@@ -1,11 +1,13 @@
 from aiogram.types import Message, ShippingOption, ShippingQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import ContentType
 
-from main import dp, bot
+from main import dp, bot, db
 from messages import MESSAGES
 from config import BANK_TOKEN, item_url
 
 from Buttons.Client import Markups
+
+
 
 PRICES = [
     LabeledPrice(label="Мёд донниковый", amount=45000)
@@ -37,7 +39,11 @@ PICKUP_SHIPPING_OPTION = ShippingOption(
 
 @dp.message_handler(commands=['start'])
 async def start_cmd(message: Message):
-    await message.answer(MESSAGES['start'])
+    if not db.user_exists(message.from_user.id):
+        db.add_user(message.from_user.id)
+        await message.answer(MESSAGES['start'])
+    else:
+        await bot.send_message(message.from_user.id, "Добро пожаловать!", reply_markup=Markups.mainMenu)
 
 
 @dp.message_handler(commands=['help'])
